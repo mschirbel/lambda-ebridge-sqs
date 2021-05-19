@@ -17,7 +17,7 @@ Every 10 minutes the EventBridge Rule will trigger the Sender AWS Lambda Functio
 First of all, install the dependencies:
 
 ```
-brew instal node
+brew install node
 npm i
 ```
 
