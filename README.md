@@ -14,6 +14,13 @@ Every 10 minutes the EventBridge Rule will trigger the Sender AWS Lambda Functio
 
 ## Usage
 
+First of all, install the dependencies:
+
+```
+brew instal node
+npm i
+```
+
 To deploy this application:
 
 ```
