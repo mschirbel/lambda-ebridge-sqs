@@ -19,6 +19,7 @@ First of all, install the dependencies:
 ```
 brew install node
 npm i
+npm i -g serverless
 ```
 
 To deploy this application:
