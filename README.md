@@ -10,6 +10,8 @@ In this demo, we have the following resources:
 
 ![](docs/architecture.png)
 
+Every 10 minutes the EventBridge Rule will trigger the Sender AWS Lambda Function. This functions writes a message to the AWS SQS, which triggers another AWS Lambda Function.
+
 ## Usage
 
 To deploy this application:
