@@ -1,0 +1,63 @@
+service: demo
+variablesResolutionMode: 20210326 #https://www.serverless.com/framework/docs/deprecations/
+
+plugins:
+  - serverless-iam-roles-per-function
+
+# here we configure our provider
+provider:
+  name: aws
+  runtime: python3.8
+  region: ${self:custom.region}
+  stage: ${self:custom.stage}
+  lambdaHashingVersion: 20201221
+  eventBridge:
+    useCloudFormation: true
+
+custom:
+  account: ${file(config/getAccountId.js):getAccountId}
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  prefix: ${self:custom.stage}-${self:service}
+  sqs: ${self:custom.prefix}-ebdrige
+
+# here we can configure our lambda functions
+functions:
+  sender:
+    handler: functions/sender.lambda_handler
+    events:
+      - eventBridge:
+          schedule: rate(10 minutes)
+    environment:
+      SQS_NAME: ${self:custom.sqs}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:GetQueueUrl
+          - sqs:SendMessage
+        Resource: arn:aws:sqs:${self:custom.region}:${self:custom.account}:${self:custom.sqs}
+    tags:
+      Name: sender
+      Env: Demo
+  receiver:
+    handler: functions/receiver.lambda_handler
+    events:
+      - sqs: arn:aws:sqs:${self:custom.region}:${self:custom.account}:${self:custom.sqs}
+    environment:
+      SQS_NAME: ${self:custom.sqs}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:GetQueueUrl
+          - sqs:ReceiveMessage
+        Resource: arn:aws:sqs:${self:custom.region}:${self:custom.account}:${self:custom.sqs}
+    tags:
+      Name: receiver
+      Env: Demo
+
+resources:
+  Resources:
+    DemoEBridgeQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:custom.sqs}
